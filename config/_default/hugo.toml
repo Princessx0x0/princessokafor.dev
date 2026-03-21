@@ -1,0 +1,8 @@
+baseURL = "https://princessokafor.dev/"
+languageCode = "en"
+title = "Princess Okafor"
+theme = "PaperMod"
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"

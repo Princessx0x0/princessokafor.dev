@@ -1,0 +1,17 @@
+defaultTheme = "dark"
+ShowReadingTime = true
+ShowPostNavLinks = true
+ShowCodeCopyButtons = true
+
+[profileMode]
+  enabled = true
+  title = "Princess Okafor"
+  subtitle = "Cloud Engineer · Building hybrid infrastructure at the intersection of AI, networking, and security"
+  
+[[profileMode.buttons]]
+  name = "Blog"
+  url = "/posts/"
+
+[[profileMode.buttons]]
+  name = "About"
+  url = "/about/"
