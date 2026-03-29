@@ -1,7 +1,8 @@
+---
 title: "From Local Inference to Hybrid Cloud: Setting Up Ollama on Apple Silicon and Connecting It to GCP"
 date: 2026-03-29
 tags: ["Ollama", "Apple Silicon", "LLM", "Terraform", "GCP", "Tailscale", "VPC", "IAP", "Zero Trust"]
-description: "I set up a Mac Mini M1 running Mistral 7B with Ollama, Terraformed a zero-trust GCP environment, and connected them through an encrypted Tailscale tunnel. A GCP VM with no public IP now calls a local AI model in my home."
+description: "I set up a Mac Mini M1 running Mistral 7B with Ollama, Terraformed a zero-trust GCP environment, and connected them through an encrypted Tailscale tunnel."
 ---
 
 This post covers Phase 1 and Phase 2 of my hybrid AI inference platform. Phase 1 gets local inference running on a Mac Mini. Phase 2 builds the cloud side with Terraform and connects the two through a private network. By the end, a GCP VM in us-central1 is calling an AI model on my Mac Mini in Lincoln, UK, through an encrypted tunnel.
