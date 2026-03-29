@@ -15,5 +15,16 @@
       <guid>http://localhost:1313/posts/00-building-this-blog/</guid>
       <description>I built my own blog infrastructure instead of using Medium. Here&amp;#39;s why, and how I set it up with Hugo, PaperMod, GitHub Pages, and a custom domain on Cloudflare.</description>
     </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/01-02-inference-hybrid-connect/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/01-02-inference-hybrid-connect/</guid>
+      <description>&lt;h2 id=&#34;description-i-set-up-a-mac-mini-m1-running-mistral-7b-with-ollama-terraformed-a-zero-trust-gcp-environment-and-connected-them-through-an-encrypted-tailscale-tunnel-a-gcp-vm-with-no-public-ip-now-calls-a-local-ai-model-in-my-home&#34;&gt;title: &amp;ldquo;From Local Inference to Hybrid Cloud: Setting Up Ollama on Apple Silicon and Connecting It to GCP&amp;rdquo;
+date: 2026-03-29
+tags: [&amp;ldquo;Ollama&amp;rdquo;, &amp;ldquo;Apple Silicon&amp;rdquo;, &amp;ldquo;LLM&amp;rdquo;, &amp;ldquo;Terraform&amp;rdquo;, &amp;ldquo;GCP&amp;rdquo;, &amp;ldquo;Tailscale&amp;rdquo;, &amp;ldquo;VPC&amp;rdquo;, &amp;ldquo;IAP&amp;rdquo;, &amp;ldquo;Zero Trust&amp;rdquo;]
+description: &amp;ldquo;I set up a Mac Mini M1 running Mistral 7B with Ollama, Terraformed a zero-trust GCP environment, and connected them through an encrypted Tailscale tunnel. A GCP VM with no public IP now calls a local AI model in my home.&amp;rdquo;&lt;/h2&gt;
+&lt;p&gt;This post covers Phase 1 and Phase 2 of my hybrid AI inference platform. Phase 1 gets local inference running on a Mac Mini. Phase 2 builds the cloud side with Terraform and connects the two through a private network. By the end, a GCP VM in us-central1 is calling an AI model on my Mac Mini in Lincoln, UK, through an encrypted tunnel.&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>

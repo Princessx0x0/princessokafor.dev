@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="light">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Princess Okafor</title>
+<meta name="keywords" content="">
+<meta name="description" content="title: &ldquo;From Local Inference to Hybrid Cloud: Setting Up Ollama on Apple Silicon and Connecting It to GCP&rdquo;
+date: 2026-03-29
+tags: [&ldquo;Ollama&rdquo;, &ldquo;Apple Silicon&rdquo;, &ldquo;LLM&rdquo;, &ldquo;Terraform&rdquo;, &ldquo;GCP&rdquo;, &ldquo;Tailscale&rdquo;, &ldquo;VPC&rdquo;, &ldquo;IAP&rdquo;, &ldquo;Zero Trust&rdquo;]
+description: &ldquo;I set up a Mac Mini M1 running Mistral 7B with Ollama, Terraformed a zero-trust GCP environment, and connected them through an encrypted Tailscale tunnel. A GCP VM with no public IP now calls a local AI model in my home.&rdquo;
+This post covers Phase 1 and Phase 2 of my hybrid AI inference platform. Phase 1 gets local inference running on a Mac Mini. Phase 2 builds the cloud side with Terraform and connects the two through a private network. By the end, a GCP VM in us-central1 is calling an AI model on my Mac Mini in Lincoln, UK, through an encrypted tunnel.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/01-02-inference-hybrid-connect/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f4ba22009320ca2e95e57245e7e620d99868929c49c89f97cbc407ee6c87444c.css" integrity="sha256-9LoiAJMgyi6V5XJF5&#43;Yg2ZhokpxJyJ&#43;Xy8QH7myHREw=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/01-02-inference-hybrid-connect/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Princess Okafor (Alt + H)">Princess Okafor</a>
+            <div class="logo-switches">
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      
+    </h1>
+    <div class="post-meta"><span>8 min</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="description-i-set-up-a-mac-mini-m1-running-mistral-7b-with-ollama-terraformed-a-zero-trust-gcp-environment-and-connected-them-through-an-encrypted-tailscale-tunnel-a-gcp-vm-with-no-public-ip-now-calls-a-local-ai-model-in-my-home">title: &ldquo;From Local Inference to Hybrid Cloud: Setting Up Ollama on Apple Silicon and Connecting It to GCP&rdquo;
+date: 2026-03-29
+tags: [&ldquo;Ollama&rdquo;, &ldquo;Apple Silicon&rdquo;, &ldquo;LLM&rdquo;, &ldquo;Terraform&rdquo;, &ldquo;GCP&rdquo;, &ldquo;Tailscale&rdquo;, &ldquo;VPC&rdquo;, &ldquo;IAP&rdquo;, &ldquo;Zero Trust&rdquo;]
+description: &ldquo;I set up a Mac Mini M1 running Mistral 7B with Ollama, Terraformed a zero-trust GCP environment, and connected them through an encrypted Tailscale tunnel. A GCP VM with no public IP now calls a local AI model in my home.&rdquo;</h2>
+<p>This post covers Phase 1 and Phase 2 of my hybrid AI inference platform. Phase 1 gets local inference running on a Mac Mini. Phase 2 builds the cloud side with Terraform and connects the two through a private network. By the end, a GCP VM in us-central1 is calling an AI model on my Mac Mini in Lincoln, UK, through an encrypted tunnel.</p>
+<h2 id="part-1-local-inference">Part 1: Local Inference<a hidden class="anchor" aria-hidden="true" href="#part-1-local-inference">#</a></h2>
+<h3 id="why-local-inference-matters">Why local inference matters<a hidden class="anchor" aria-hidden="true" href="#why-local-inference-matters">#</a></h3>
+<p>Cloud AI inference is powerful but expensive. Every API call to Vertex AI or OpenAI costs money. For straightforward tasks like summarisation, Q&amp;A, and code explanation, a smaller model running on your own hardware handles the job without the bill.</p>
+<p>The Mac Mini M1 with 16GB unified memory is well suited for this. Apple Silicon&rsquo;s unified memory architecture means the CPU and GPU share the same RAM pool. There is no bottleneck copying data between separate memory banks, which is exactly what inference workloads need. Ollama optimises specifically for this architecture.</p>
+<p>The cost of running inference locally is essentially electricity. The cost of cloud inference is per-token. For a portfolio project where I will be making thousands of test requests, local inference saves real money.</p>
+<h3 id="installing-ollama">Installing Ollama<a hidden class="anchor" aria-hidden="true" href="#installing-ollama">#</a></h3>
+<p>Ollama handles model downloads, memory management, and serves inference over an HTTP API. Installation with Homebrew:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>brew install ollama
+</span></span></code></pre></div><p>Starting the server:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ollama serve
+</span></span></code></pre></div><p>Pulling Mistral 7B:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ollama pull mistral
+</span></span></code></pre></div><p>The download is about 4GB. Once complete, you can test interactively:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ollama run mistral <span style="color:#e6db74">&#34;What is BGP and why is it important for hybrid cloud networking?&#34;</span>
+</span></span></code></pre></div><p>Mistral responds with a detailed explanation. On my M1, the first request takes 5-6 seconds because the model loads into memory from disk. After that, the model stays loaded and subsequent requests are faster.</p>
+<h3 id="understanding-the-http-api">Understanding the HTTP API<a hidden class="anchor" aria-hidden="true" href="#understanding-the-http-api">#</a></h3>
+<p>The interactive terminal mode is useful for testing, but the hybrid platform needs a programmable interface. Ollama exposes a REST API on port 11434:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://localhost:11434/api/generate <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;model&#34;: &#34;mistral&#34;, &#34;prompt&#34;: &#34;hello&#34;, &#34;stream&#34;: false}&#39;</span>
+</span></span></code></pre></div><p>The response is JSON:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;model&#34;</span>: <span style="color:#e6db74">&#34;mistral&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;response&#34;</span>: <span style="color:#e6db74">&#34;Hello! How can I help you today?&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;total_duration&#34;</span>: <span style="color:#ae81ff">3701572250</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;load_duration&#34;</span>: <span style="color:#ae81ff">1388095834</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;prompt_eval_count&#34;</span>: <span style="color:#ae81ff">6</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;prompt_eval_duration&#34;</span>: <span style="color:#ae81ff">366034291</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;eval_count&#34;</span>: <span style="color:#ae81ff">26</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;eval_duration&#34;</span>: <span style="color:#ae81ff">1926452792</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Breaking down the key fields:</p>
+<p><strong>total_duration</strong> is in nanoseconds. 3.7 seconds total for this request, which includes loading the model.</p>
+<p><strong>load_duration</strong> of 1.4 seconds is the time spent loading the model into memory. This only happens on the first request or after the model has been evicted. Subsequent requests skip this entirely.</p>
+<p><strong>prompt_eval_count</strong> of 6 means the word &ldquo;hello&rdquo; was tokenised into 6 tokens. Models do not process words directly. They convert text into numerical tokens first.</p>
+<p><strong>eval_count</strong> of 26 and <strong>eval_duration</strong> of 1.9 seconds means Mistral generated 26 tokens at roughly 13-14 tokens per second. That is solid throughput for a 7B parameter model on consumer hardware.</p>
+<h3 id="cold-vs-warm-inference">Cold vs warm inference<a hidden class="anchor" aria-hidden="true" href="#cold-vs-warm-inference">#</a></h3>
+<p>Run the same request twice in a row and compare <code>total_duration</code>. The first request includes model loading. The second request skips it because the model is already in memory. On my M1:</p>
+<ul>
+<li>Cold request (model loading): ~5-6 seconds</li>
+<li>Warm request (model loaded): ~2-3 seconds</li>
+</ul>
+<p>In a production system, you would keep the model loaded permanently and monitor for unexpected cold starts. A sudden increase in response time could indicate the model was evicted from memory, which might mean another process is competing for RAM.</p>
+<h3 id="adding-a-second-model">Adding a second model<a hidden class="anchor" aria-hidden="true" href="#adding-a-second-model">#</a></h3>
+<p>I pulled Microsoft&rsquo;s Phi-3 as a lightweight alternative:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ollama pull phi3
+</span></span></code></pre></div><p>Phi-3 is smaller than Mistral 7B, which means faster responses but less capable reasoning. Having two models locally gives the orchestrator options: route simple requests to Phi-3 for speed, and complex requests to Mistral for quality.</p>
+<p>At this point, the Mac Mini is a working inference node. But it only responds to localhost. Time to connect it to the cloud.</p>
+<hr>
+<h2 id="part-2-building-the-cloud-side">Part 2: Building the Cloud Side<a hidden class="anchor" aria-hidden="true" href="#part-2-building-the-cloud-side">#</a></h2>
+<h3 id="making-ollama-reachable">Making Ollama reachable<a hidden class="anchor" aria-hidden="true" href="#making-ollama-reachable">#</a></h3>
+<p>By default, Ollama listens on <code>127.0.0.1:11434</code>. The <code>127.0.0.1</code> address means localhost only. No other machine on any network can reach it. For the hybrid platform, the GCP orchestrator needs to call this API remotely.</p>
+<p>The fix is changing the bind address. <code>127.0.0.1</code> means &ldquo;only this machine.&rdquo; <code>0.0.0.0</code> means &ldquo;all network interfaces,&rdquo; which includes localhost, WiFi, and any VPN interfaces:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>OLLAMA_HOST<span style="color:#f92672">=</span>0.0.0.0 ollama serve &amp;
+</span></span></code></pre></div><p>You can verify the difference with <code>lsof</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>lsof -i :11434
+</span></span></code></pre></div><p>Before the change, this shows <code>localhost:11434</code>. After, it shows <code>*:11434</code>. The asterisk means all interfaces.</p>
+<p><strong>A note on security:</strong> Binding to <code>0.0.0.0</code> means anyone on my local WiFi who knows the IP and port could send prompts to my model. For development behind a NAT router with no port forwarding, this is acceptable. In production, I would bind only to the Tailscale interface (<code>OLLAMA_HOST=100.80.121.94</code>) or add firewall rules restricting port 11434 to the Tailscale IP range. I will address this in the security hardening phase.</p>
+<h3 id="setting-up-tailscale">Setting up Tailscale<a hidden class="anchor" aria-hidden="true" href="#setting-up-tailscale">#</a></h3>
+<p>Tailscale creates an encrypted WireGuard mesh network. Every device that joins gets a private <code>100.x.x.x</code> IP address and can communicate directly with every other device, regardless of NATs or firewalls.</p>
+<p>I chose Tailscale over Cloudflare Tunnel for a specific reason. Cloudflare Tunnel creates outbound-only connections, which means GCP could not initiate requests to the Mac Mini. The hybrid platform needs bidirectional connectivity because the orchestrator actively calls Ollama. Tailscale provides full mesh connectivity where any node can reach any other node.</p>
+<p>On the Mac Mini:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>brew install tailscale
+</span></span><span style="display:flex;"><span>sudo tailscaled &amp;
+</span></span><span style="display:flex;"><span>sudo tailscale up
+</span></span></code></pre></div><p>After authenticating, the Mac Mini received the Tailscale IP <code>100.80.121.94</code>. Testing inference over the Tailscale interface:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://100.80.121.94:11434/api/generate <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;model&#34;: &#34;mistral&#34;, &#34;prompt&#34;: &#34;hello&#34;, &#34;stream&#34;: false}&#39;</span>
+</span></span></code></pre></div><p>Mistral responded. Ollama is now reachable over the private network.</p>
+<p>In a later phase, I will layer HA VPN with BGP on top of this Tailscale connectivity. Tailscale will act as the underlay network for IPsec tunnels, adding redundancy and dynamic routing. But the immediate goal was proving private connectivity works.</p>
+<h3 id="terraforming-the-gcp-environment">Terraforming the GCP environment<a hidden class="anchor" aria-hidden="true" href="#terraforming-the-gcp-environment">#</a></h3>
+<p>Everything on the GCP side is defined in Terraform. No console clicking, no manual setup. The code is organised into three modules:</p>
+<pre tabindex="0"><code>terraform/
+  main.tf
+  variables.tf
+  outputs.tf
+  modules/
+    network/    # VPC, subnet, firewall, Cloud NAT
+    compute/    # VM, service account, IAM
+    security/   # Secret Manager
+</code></pre><p>Each module has a single responsibility. The root <code>main.tf</code> passes outputs between them:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-hcl" data-lang="hcl"><span style="display:flex;"><span><span style="color:#66d9ef">module</span> <span style="color:#e6db74">&#34;compute&#34;</span> {
+</span></span><span style="display:flex;"><span>  source           <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;./modules/compute&#34;</span>
+</span></span><span style="display:flex;"><span>  project_id       <span style="color:#f92672">=</span> <span style="color:#66d9ef">var</span>.<span style="color:#66d9ef">project_id</span>
+</span></span><span style="display:flex;"><span>  subnet_self_link <span style="color:#f92672">=</span> <span style="color:#66d9ef">module</span>.<span style="color:#66d9ef">network</span>.<span style="color:#66d9ef">infra_subnet_self_link</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This means I can modify networking without touching compute, or replace the VM configuration without affecting the firewall rules.</p>
+<h3 id="the-network">The network<a hidden class="anchor" aria-hidden="true" href="#the-network">#</a></h3>
+<p>The VPC uses <code>auto_create_subnetworks = false</code>. By default, GCP creates a subnet in every region. Disabling this gives explicit control over IP ranges and placement.</p>
+<p>The subnet uses <code>10.10.0.0/24</code> with <code>private_ip_google_access = true</code>. Private Google Access means VMs without public IPs can still reach Google APIs like Secret Manager and Cloud Monitoring.</p>
+<p><strong>Cloud NAT</strong> provides outbound internet access. The VM needs to pull Docker images and install packages, but I do not want to assign a public IP for that. Cloud NAT acts as a managed outbound gateway. Traffic exits through an auto-allocated NAT IP, but nothing from the internet can initiate an inbound connection. One-way glass.</p>
+<h3 id="firewall-rules">Firewall rules<a hidden class="anchor" aria-hidden="true" href="#firewall-rules">#</a></h3>
+<p>The custom VPC has no default allow rules. I defined four explicit rules:</p>
+<p><strong>IAP SSH</strong>: Allows TCP port 22 from <code>35.235.240.0/20</code> only. This is Google&rsquo;s IAP range. When I SSH through IAP, Google verifies my identity before creating the tunnel. No SSH keys to manage, no bastion host to maintain, no port 22 exposed to the internet.</p>
+<p><strong>Internal traffic</strong>: Allows all protocols within <code>10.10.0.0/24</code>. VMs in the subnet can communicate freely.</p>
+<p><strong>Health checks</strong>: Allows TCP on ports 80, 443, and 8080 from Google&rsquo;s health check ranges. Preparation for when we add a load balancer.</p>
+<p><strong>Deny all</strong> (priority 65534): Explicitly denies all other ingress from <code>0.0.0.0/0</code>. GCP custom VPCs are default-deny, but making this rule explicit documents the intent.</p>
+<h3 id="the-vm">The VM<a hidden class="anchor" aria-hidden="true" href="#the-vm">#</a></h3>
+<p>The orchestrator VM is an <code>e2-micro</code> running Debian 12:</p>
+<p><strong>No external IP.</strong> The <code>network_interface</code> block has no <code>access_config</code>. The VM is invisible to the internet.</p>
+<p><strong>Shielded instance.</strong> Secure boot, vTPM, and integrity monitoring protect against boot-level tampering.</p>
+<p><strong>OS Login.</strong> Authentication uses my Google identity rather than SSH keys. No key files to rotate or leak.</p>
+<p><strong>Least-privilege service account.</strong> Only <code>logging.logWriter</code> and <code>monitoring.metricWriter</code> roles. It can send logs and metrics, nothing else.</p>
+<p><strong>Startup script.</strong> On first boot, the VM installs Docker, nginx, and Tailscale automatically.</p>
+<h3 id="the-moment-of-truth">The moment of truth<a hidden class="anchor" aria-hidden="true" href="#the-moment-of-truth">#</a></h3>
+<p>After <code>terraform apply</code> was completed, I SSH&rsquo;d into the VM through IAP:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud compute ssh orchestrator-vm --zone<span style="color:#f92672">=</span>us-central1-a --tunnel-through-iap
+</span></span></code></pre></div><p>Then joined the Tailscale network:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo tailscale up
+</span></span></code></pre></div><p>And called Ollama on my Mac Mini:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://100.80.121.94:11434/api/generate <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;model&#34;: &#34;mistral&#34;, &#34;prompt&#34;: &#34;hello&#34;, &#34;stream&#34;: false}&#39;</span>
+</span></span></code></pre></div><p>Mistral responded in 5.7 seconds. A GCP VM in us-central1, sitting in a private subnet with no public IP, sent a prompt through an encrypted Tailscale tunnel to a Mac Mini in Lincoln, UK, and received an AI-generated response.</p>
+<p>That is hybrid cloud connectivity. Built from code. Secured by default.</p>
+<h3 id="what-terraform-changes">What Terraform changes<a hidden class="anchor" aria-hidden="true" href="#what-terraform-changes">#</a></h3>
+<p>Without Terraform, this setup would mean clicking through dozens of console screens, remembering IP ranges, hoping firewall rules are consistent, and having no record of what was configured.</p>
+<p>With Terraform, the entire environment is about 200 lines of HCL across three modules. <code>terraform plan</code> shows what will change. <code>terraform apply</code> creates everything in 90 seconds. <code>terraform destroy</code> removes it cleanly. If I need to recreate this in a different region or project, I change two variables.</p>
+<p>The infrastructure is documented by being code.</p>
+<h2 id="whats-next">What&rsquo;s next<a hidden class="anchor" aria-hidden="true" href="#whats-next">#</a></h2>
+<p>Two phases down. The Mac Mini serves local inference, and GCP can reach it through an encrypted tunnel. Phase 3 layers HA VPN with BGP on top of the Tailscale connectivity for enterprise-grade redundancy. Phase 4 builds the orchestration API that intelligently routes requests between local and cloud models.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/00-building-this-blog/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>How I Built My Technical Blog with Hugo, GitHub Actions &amp; a Custom Domain</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">Princess Okafor</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
