@@ -66,6 +66,20 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">HA VPN with BGP: Building Enterprise-Grade Hybrid Connectivity on GCP
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>This is Phase 3 of the hybrid AI inference platform. In the previous post, I connected a Mac Mini running Ollama to a GCP VM through Tailscale. That works for direct connectivity, but it is a single tunnel with no redundancy and no dynamic routing. This phase adds the enterprise-grade networking layer: HA VPN with BGP.
+What I tried first (and why it failed) My original plan was to build HA VPN directly between GCP and my Mac Mini, using Tailscale as the underlay network. The Mac Mini’s Tailscale IP is 100.80.121.94, and I configured it as the peer endpoint for the VPN tunnels in Terraform.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2026-03-31 00:00:00 +0000 UTC'>March 31, 2026</span>&nbsp;·&nbsp;<span>7 min</span></footer>
+  <a class="entry-link" aria-label="post link to HA VPN with BGP: Building Enterprise-Grade Hybrid Connectivity on GCP" href="http://localhost:1313/posts/02-ha-vpn-bgp/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">From Local Inference to Hybrid Cloud: Setting Up Ollama on Apple Silicon and Connecting It to GCP
     </h2>
   </header>

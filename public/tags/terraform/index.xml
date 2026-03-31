@@ -6,8 +6,15 @@
     <description>Recent content in Terraform on Princess Okafor</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 29 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 31 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/terraform/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HA VPN with BGP: Building Enterprise-Grade Hybrid Connectivity on GCP</title>
+      <link>http://localhost:1313/posts/02-ha-vpn-bgp/</link>
+      <pubDate>Tue, 31 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/02-ha-vpn-bgp/</guid>
+      <description>I built a fully functional HA VPN with BGP dynamic routing between two GCP VPCs, tested failover by killing a tunnel and watching BGP reroute, then recovered with Terraform. Here&amp;#39;s everything I learned.</description>
+    </item>
     <item>
       <title>From Local Inference to Hybrid Cloud: Setting Up Ollama on Apple Silicon and Connecting It to GCP</title>
       <link>http://localhost:1313/posts/01-02-inference-hybrid-connect/</link>
