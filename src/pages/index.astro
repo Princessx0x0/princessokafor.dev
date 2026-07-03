@@ -1356,6 +1356,7 @@ function togglePm(open) {
   pmOpen = open;
   document.getElementById('pm-drawer').classList.toggle('open', open);
   document.getElementById('pm-overlay').classList.toggle('open', open);
+  document.getElementById('pm-fab').style.display = open ? 'none' : 'flex';
   if (open) document.getElementById('pm-input').focus();
   document.body.style.overflow = open ? 'hidden' : '';
 }
@@ -1392,7 +1393,13 @@ async function pmAsk(text) {
 function pmAddMsg(type, text) {
   const el = document.createElement('div');
   el.className = `pm-msg ${type}`;
-  el.textContent = text;
+  // Parse basic markdown bold
+  el.innerHTML = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
   const c = document.getElementById('pm-messages');
   c.appendChild(el);
   c.scrollTop = c.scrollHeight;
