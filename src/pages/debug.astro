@@ -1,0 +1,10 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+const posts = await getCollection('vera');
+const single = await getEntry('vera', 'vera-why-i-built-it');
+---
+<p>Collection count: {posts.length}</p>
+<p>Single entry: {single ? single.id : 'NOT FOUND'}</p>
+<ul>
+  {posts.map(p => <li>{p.id}</li>)}
+</ul>

@@ -38,6 +38,55 @@
 
     html { scroll-behavior: smooth; }
 
+  
+  #chat-fab {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #1B3A6B; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(27,58,107,0.35);
+    transition: transform 0.2s, background 0.2s; z-index: 9999;
+  }
+  #chat-fab:hover { background: #0055CC; transform: scale(1.07); }
+  #chat-fab svg { width: 22px; height: 22px; fill: white; }
+  #chat-panel {
+    position: fixed; bottom: 92px; right: 28px;
+    width: 360px; max-height: 520px; background: #ffffff;
+    border: 1px solid #E2DCE8; border-radius: 16px;
+    display: flex; flex-direction: column; overflow: hidden;
+    z-index: 9998; box-shadow: 0 8px 40px rgba(27,58,107,0.18);
+    opacity: 0; transform: translateY(12px) scale(0.97);
+    pointer-events: none; transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  #chat-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+  .panel-header {
+    background: #0F2347; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;
+  }
+  .panel-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #C4789A, #0055CC);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, serif; font-size: 14px; color: white;
+    font-style: italic; flex-shrink: 0;
+  }
+  .panel-title { font-family: Georgia, serif; font-size: 0.95rem; color: white; }
+  .panel-sub { font-family: monospace; font-size: 0.62rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 1px; }
+  .panel-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; min-height: 0; }
+  .msg { max-width: 88%; font-family: system-ui, sans-serif; font-size: 0.85rem; line-height: 1.55; padding: 0.65rem 0.9rem; border-radius: 12px; }
+  .msg.assistant { background: #F7F0F4; color: #18182A; align-self: flex-start; border-bottom-left-radius: 3px; }
+  .msg.user { background: #1B3A6B; color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+  .msg.typing { background: #F7F0F4; align-self: flex-start; color: #9898B0; font-style: italic; }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 1rem 0.75rem; }
+  .sug-btn { font-family: monospace; font-size: 0.67rem; letter-spacing: 0.05em; padding: 0.3rem 0.7rem; border: 1px solid #E2DCE8; background: white; color: #5C5C78; border-radius: 20px; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+  .sug-btn:hover { border-color: #C4789A; color: #C4789A; }
+  .panel-input-row { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid #E2DCE8; flex-shrink: 0; }
+  .panel-input { flex: 1; font-family: system-ui, sans-serif; font-size: 0.85rem; padding: 0.5rem 0.75rem; border: 1px solid #E2DCE8; border-radius: 8px; outline: none; color: #18182A; background: white; transition: border-color 0.15s; }
+  .panel-input:focus { border-color: #1B3A6B; }
+  .send-btn { width: 34px; height: 34px; border-radius: 8px; background: #1B3A6B; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+  .send-btn:hover { background: #0055CC; }
+  .send-btn svg { width: 15px; height: 15px; fill: white; }
+
     body {
       font-family: var(--sans);
       background: var(--white);
@@ -1190,6 +1239,168 @@
     window.addEventListener('resize', resize);
   })();
 </script>
+<style>
+  #pm-fab {
+    position: fixed; bottom: 32px; right: 32px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #0F2347; border: 1.5px solid rgba(196,120,154,0.4);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    z-index: 9999; animation: pm-pulse 3s ease-in-out infinite;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  #pm-fab:hover { transform: scale(1.08); border-color: rgba(196,120,154,0.9); box-shadow: 0 0 20px rgba(196,120,154,0.35); animation: none; }
+  @keyframes pm-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(196,120,154,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(196,120,154,0); }
+  }
+  .pm-monogram {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.7rem; font-style: italic; font-weight: 400;
+    background: linear-gradient(135deg, #fff 0%, #C4789A 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; user-select: none; line-height: 1;
+  }
+  #pm-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,35,71,0.5); backdrop-filter: blur(3px);
+    z-index: 9997; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  #pm-overlay.open { opacity: 1; pointer-events: all; }
+  #pm-drawer {
+    position: fixed; top: 0; right: 0; width: 400px; height: 100vh;
+    background: #ffffff; z-index: 9998; display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.32,0,0,1);
+    box-shadow: -8px 0 40px rgba(15,35,71,0.18);
+  }
+  #pm-drawer.open { transform: translateX(0); }
+  .pm-header {
+    background: #0F2347; padding: 1.5rem 1.25rem;
+    flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .pm-header-left { display: flex; align-items: center; gap: 1rem; }
+  .pm-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, #C4789A 0%, #0055CC 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.2rem; font-style: italic; color: white; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.15);
+  }
+  .pm-name { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.05rem; font-style: italic; color: white; line-height: 1.2; }
+  .pm-tagline { font-family: monospace; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 3px; }
+  .pm-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.4); font-size: 1.2rem; padding: 0; transition: color 0.15s; }
+  .pm-close:hover { color: white; }
+  .pm-intro { background: #F7F0F4; border-bottom: 1px solid #E2DCE8; padding: 1rem 1.25rem; flex-shrink: 0; }
+  .pm-intro p { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 0.98rem; font-style: italic; color: #5C5C78; line-height: 1.65; }
+  .pm-intro p strong { color: #1B3A6B; font-style: normal; font-weight: 500; }
+  .pm-suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid #E2DCE8; flex-shrink: 0; }
+  .pm-sug { font-family: monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.3rem 0.75rem; border: 1px solid #E2DCE8; background: white; color: #5C5C78; border-radius: 20px; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+  .pm-sug:hover { border-color: #C4789A; color: #C4789A; }
+  .pm-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem; min-height: 0; }
+  .pm-msg { max-width: 90%; font-family: system-ui, sans-serif; font-size: 0.87rem; line-height: 1.6; padding: 0.7rem 1rem; border-radius: 14px; }
+  .pm-msg.assistant { background: #F7F0F4; color: #18182A; align-self: flex-start; border-bottom-left-radius: 3px; }
+  .pm-msg.user { background: #1B3A6B; color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+  .pm-msg.typing { background: #F7F0F4; align-self: flex-start; color: #9898B0; font-style: italic; font-size: 0.82rem; }
+  .pm-input-row { display: flex; gap: 0.5rem; padding: 1rem 1.25rem; border-top: 1px solid #E2DCE8; flex-shrink: 0; background: white; }
+  .pm-input { flex: 1; font-family: system-ui, sans-serif; font-size: 0.87rem; padding: 0.6rem 0.9rem; border: 1px solid #E2DCE8; border-radius: 10px; outline: none; color: #18182A; background: white; transition: border-color 0.15s; }
+  .pm-input:focus { border-color: #1B3A6B; }
+  .pm-send { width: 38px; height: 38px; border-radius: 10px; background: #1B3A6B; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; align-self: flex-end; }
+  .pm-send:hover { background: #0055CC; }
+  .pm-send svg { width: 15px; height: 15px; fill: white; }
+  @media (max-width: 440px) { #pm-drawer { width: 100vw; } }
+</style>
 
+<div id="pm-overlay"></div>
+
+<button id="pm-fab" aria-label="Chat with Princess-mini">
+  <span class="pm-monogram">P</span>
+</button>
+
+<div id="pm-drawer" role="dialog" aria-label="Princess-mini AI assistant">
+  <div class="pm-header">
+    <div class="pm-header-left">
+      <div class="pm-avatar">P</div>
+      <div>
+        <div class="pm-name">Princess-mini</div>
+        <div class="pm-tagline">AI · Knows everything about her</div>
+      </div>
+    </div>
+    <button class="pm-close" id="pm-close" aria-label="Close">✕</button>
+  </div>
+  <div class="pm-intro">
+    <p>Hi, I'm <strong>Princess-mini</strong> — an AI that knows everything about Princess: her work, her projects, VERA, her background, and the thinking behind it all. Ask me anything.</p>
+  </div>
+  <div class="pm-suggestions" id="pm-sugs">
+    <button class="pm-sug" onclick="pmAsk('What is VERA?')">What is VERA?</button>
+    <button class="pm-sug" onclick="pmAsk('Most impressive thing she built?')">Most impressive thing?</button>
+    <button class="pm-sug" onclick="pmAsk('Summarise her work')">Summarise her work</button>
+    <button class="pm-sug" onclick="pmAsk('What makes her different?')">What makes her different?</button>
+  </div>
+  <div class="pm-messages" id="pm-messages"></div>
+  <div class="pm-input-row">
+    <input class="pm-input" id="pm-input" type="text" placeholder="Ask something about Princess..." />
+    <button class="pm-send" id="pm-send" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const PROXY = 'https://vera-assistant-proxy-671998161776.europe-west2.run.app';
+const pmMsgs = [];
+let pmOpen = false;
+
+function togglePm(open) {
+  pmOpen = open;
+  document.getElementById('pm-drawer').classList.toggle('open', open);
+  document.getElementById('pm-overlay').classList.toggle('open', open);
+  if (open) document.getElementById('pm-input').focus();
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+
+document.getElementById('pm-fab').onclick = () => togglePm(true);
+document.getElementById('pm-close').onclick = () => togglePm(false);
+document.getElementById('pm-overlay').onclick = () => togglePm(false);
+
+async function pmAsk(text) {
+  const input = text || document.getElementById('pm-input').value.trim();
+  if (!input) return;
+  document.getElementById('pm-input').value = '';
+  document.getElementById('pm-sugs').style.display = 'none';
+  pmAddMsg('user', input);
+  pmMsgs.push({ role: 'user', content: input });
+  const typing = pmAddMsg('typing', 'Princess-mini is thinking...');
+  try {
+    const res = await fetch(`${PROXY}/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: pmMsgs })
+    });
+    const data = await res.json();
+    const reply = data.content || 'Something went wrong — try again!';
+    typing.remove();
+    pmAddMsg('assistant', reply);
+    pmMsgs.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    typing.remove();
+    pmAddMsg('assistant', 'Hmm, connection issue. Try again in a sec.');
+  }
+}
+
+function pmAddMsg(type, text) {
+  const el = document.createElement('div');
+  el.className = `pm-msg ${type}`;
+  el.textContent = text;
+  const c = document.getElementById('pm-messages');
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+  return el;
+}
+
+document.getElementById('pm-send').onclick = () => pmAsk();
+document.getElementById('pm-input').onkeydown = e => { if (e.key === 'Enter') pmAsk(); };
+</script>
 </body>
 </html>
