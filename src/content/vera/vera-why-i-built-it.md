@@ -16,9 +16,14 @@ Then I got my results.
 
 HireVue promises personalised insights based on your performance. Mine came back glowing. High marks for teamwork. Strong signals on cognitive complexity and adaptability. The kind of feedback that makes you think: *okay, I have got this.*
 
-![HireVue feedback from my BAE Systems assessment showing strong signals across all three competency areas](/images/vera/hirevue-feedback.png)
-*HireVue's own assessment of my performance: before the 2AM rejection.*
 
+<div class="image-scroll-wrap">
+  <div class="image-scroll-container">
+    <img src="/images/vera/hirevue-feedback.webp" alt="HireVue feedback from my BAE Systems assessment" />
+  </div>
+  <p class="scroll-hint">swipe to explore →</p>
+  <em>HireVue's own assessment of my performance: before the 2AM rejection.</em>
+</div>
 
 At 2AM, a rejection arrived.
 
