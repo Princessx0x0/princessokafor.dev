@@ -5,6 +5,8 @@ tags: ["Hugo", "GitHub Actions", "CI/CD", "Cloudflare", "DNS"]
 description: "I built my own blog infrastructure instead of using Medium. Here's why, and how I set it up with Hugo, PaperMod, GitHub Pages, and a custom domain on Cloudflare."
 ---
 
+> **Update, October 2026:** this site no longer runs on Hugo. It was rebuilt on Astro, and the deploy pipeline described below has changed accordingly. The post is kept as a record of the original build.
+
 I could have used Medium. I could have used Hashnode or Dev.to. But I'm a cloud engineer, and the way I publish my writing should reflect that.
 
 This blog is a Git repository. Every post is a Markdown file. When I push to `main`, a GitHub Actions pipeline builds the site with Hugo and deploys it to GitHub Pages. My custom domain is managed through Cloudflare. The whole thing is infrastructure-as-code, version-controlled, and automated.

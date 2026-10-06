@@ -8,7 +8,7 @@ order: 2
 
 The naive approach was tempting. Toss a job description at an LLM and ask for a psychometric framework. I tried it. It failed miserably.
 
-Building an AI tool in the HR tech space right now means playing on hard mode. Under the EU AI Act, AI systems used for recruitment and hiring are classified as high-risk. Transparency, human oversight, and data integrity are not features you tack on later -- they are the core engineering constraints from day one.
+Building an AI tool in the HR tech space right now means playing on hard mode. Under the EU AI Act, AI systems used for recruitment and hiring are classified as high-risk. Transparency, human oversight, and data integrity are not features you tack on later. They are the core engineering constraints from day one.
 
 Here is why a single-prompt architecture breaks down under production constraints, and how we engineered a multi-pass, parallelised, schema-enforced inference pipeline that delivers compliant, assessment-ready frameworks in under 10 seconds.
 
@@ -22,7 +22,7 @@ A single LLM call cannot reliably optimise for two structurally distinct cogniti
 
 When you smash these tasks together into one mega-prompt, the model chokes. The competency descriptions end up vague because the model is distracted by the scoring matrix, or the scoring anchors turn into generic boilerplate because the model exhausted its attention on the initial synthesis.
 
-By separating the architecture into two dedicated passes -- each with its own specialised system instructions and explicit JSON schemas -- the model is freed to execute each task in complete isolation.
+By separating the architecture into two dedicated passes, each with its own specialised system instructions and explicit JSON schemas, the model is freed to execute each task in complete isolation.
 
 <div class="image-scroll-wrap">
   <div class="image-scroll-container">
@@ -37,7 +37,7 @@ Pass 1 runs at `temperature=0.2` to prioritise structure and analytical consiste
 
 ### 1. Intentional Persona Framing
 
-We explicitly anchor the prompt: *"You are an expert Industrial-Organisational Psychologist designing bias-free competency frameworks."* This is not decorative prompting fluff. LLM output quality is sensitive to role framing -- instructing the model to operate within the specific terminology of I-O psychology activates hyper-specific latent patterns around construct validity and behavioural specificity.
+We explicitly anchor the prompt: *"You are an expert Industrial-Organisational Psychologist designing bias-free competency frameworks."* This is not decorative prompting fluff. LLM output quality is sensitive to role framing: instructing the model to operate within the specific terminology of I-O psychology activates hyper-specific latent patterns around construct validity and behavioural specificity.
 
 ### 2. Embedded Few-Shot Anchoring
 
@@ -95,7 +95,7 @@ if total != 1.0 and len(competencies) > 0:
     )
 ```
 
-The user sees a perfectly balanced 100% framework -- not because the AI was mathematically perfect, but because the application code cleanly clamped the boundaries.
+The user sees a perfectly balanced 100% framework, not because the AI was mathematically perfect, but because the application code cleanly clamped the boundaries.
 
 ## Pass 2: Massively Parallel Scoring Anchors
 
@@ -113,7 +113,7 @@ def _pass2_parallel(competencies: list, role_title: str) -> list:
         return [f.result() for f in futures]
 ```
 
-Instead of the total processing time being the sum of all calls, our total latency is simply the execution time of the single slowest call -- typically 2 to 3 seconds.
+Instead of the total processing time being the sum of all calls, our total latency is simply the execution time of the single slowest call, typically 2 to 3 seconds.
 
 ### Fighting Ambiguity with the 15-Word Constraint
 
@@ -131,7 +131,7 @@ Scale rules: 5=exceptional master, 4=strong, 3=reactive rule-based, 2=struggles,
 
 The 15-word constraint is a deliberate psychometric defence mechanism. If you let an LLM write a 50-word paragraph for a scoring anchor, you introduce massive subjective ambiguity. Short, tight, punchy behavioural indicators force the model to zero in on the exact differentiating signal for that skill level.
 
-Injecting `{role_title}` directly ensures a communication competency anchor for a Motion Animator explicitly references articulating creative movement and timing -- not generic corporate presentation skills.
+Injecting `{role_title}` directly ensures a communication competency anchor for a Motion Animator explicitly references articulating creative movement and timing, not generic corporate presentation skills.
 
 ## The Compliance Gate: Output Assembly
 
@@ -150,9 +150,9 @@ return {
 
 Two critical fields:
 
-**`ai_generated: True`** -- this flag is persistent. It journeys through the database and into the final audit logs so any downstream compliance audit can clearly differentiate automated framework foundations from human-built ones.
+**`ai_generated: True`**. This flag is persistent. It journeys through the database and into the final audit logs so any downstream compliance audit can clearly differentiate automated framework foundations from human-built ones.
 
-**`status: "pending_review"`** -- this is our hard architectural line for the EU AI Act. A framework cannot be assigned to an active candidate assessment until a human recruiter logs in, reviews the text, and explicitly approves it. Human oversight is not an afterthought option on a settings page. It is physically hardcoded into the data state lifecycle.
+**`status: "pending_review"`**. This is our hard architectural line for the EU AI Act. A framework cannot be assigned to an active candidate assessment until a human recruiter logs in, reviews the text, and explicitly approves it. Human oversight is not an afterthought option on a settings page. It is physically hardcoded into the data state lifecycle.
 
 ## The Defensive Engineering Matrix
 
@@ -173,4 +173,4 @@ By decoupling ingestion, processing, calibration, and compliance checks into ind
 
 ---
 
-*In the next post: the Global Endpoint Pivot -- how hidden regional cloud quotas almost broke our production environment mid-interview, and the tough data-residency tradeoffs required to fix it.*
+*In the next post: the Global Endpoint Pivot, how hidden regional cloud quotas almost broke our production environment mid-interview, and the tough data-residency tradeoffs required to fix it.*

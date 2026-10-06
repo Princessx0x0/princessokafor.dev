@@ -1,0 +1,24 @@
+---
+import SiteHead from '../components/SiteHead.astro';
+import '../styles/base.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  path?: string;
+  ogType?: string;
+  image?: string;
+}
+
+const { title, description, path, ogType, image } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <SiteHead title={title} description={description} path={path} ogType={ogType} image={image} />
+  <slot name="head" />
+</head>
+<body>
+  <slot />
+</body>
+</html>

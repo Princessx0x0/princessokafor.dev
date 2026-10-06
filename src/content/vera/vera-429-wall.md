@@ -6,7 +6,7 @@ tags: ["VERA", "GCP", "Vertex AI", "Rate Limiting", "EU AI Act", "Build Series"]
 order: 3
 ---
 
-Every developer building with large language models knows the honeymoon phase. That magical window during local testing where everything works flawlessly. For VERA, I was running a custom framework for a Tailor role -- defining required skills like Sewing, Embroidery, Creativity, Sketching, and Communication.
+Every developer building with large language models knows the honeymoon phase. That magical window during local testing where everything works flawlessly. For VERA, I was running a custom framework for a Tailor role, defining required skills like Sewing, Embroidery, Creativity, Sketching, and Communication.
 
 The engine generated the weighted competencies beautifully in under two minutes. I started a live interview mock, began interacting with the candidate interface, and then, right on the third conversation turn, the screen froze.
 
@@ -44,7 +44,7 @@ The moment we switched configuration to point to `europe-west2` Vertex AI region
 
 We checked the Google Cloud Console quota dashboard. Token allowances were wide open. We requested increases. Denied.
 
-Then came the strangest part: when searching the GCP quota console for `europe-west2`, Gemini 2.5 Pro was right there. Various Text-to-Speech variants were there. But Gemini 2.5 Flash -- the core workhorse model driving VERA's conversation engine -- was completely missing from the console.
+Then came the strangest part: when searching the GCP quota console for `europe-west2`, Gemini 2.5 Pro was right there. Various Text-to-Speech variants were there. But Gemini 2.5 Flash, the core workhorse model driving VERA's conversation engine, was completely missing from the console.
 
 The region exposed older models. It exposed TTS variants. But it did not surface the base Flash model quota in a way that could be adjusted. We were bottlenecked by a regional resource constraint we could not even see.
 
@@ -86,7 +86,9 @@ VERA is built to align with the EU AI Act. When our infrastructure used the regi
 
 By pivoting to `location="global"`, we transferred routing control to Google. While our Cloud Run application server still sits securely in London, the raw transcript arrays and text packets sent during LLM inference may be processed in data centres outside the UK or EU depending on global demand.
 
-For our current operational phase -- running pilot programmes with Amata Storytelling and supporting my MSc dissertation evaluation -- this is an acceptable tradeoff for operational stability. High-risk AI compliance requires acknowledgment, not perfection.
+For our current operational phase, running pilot programmes with Amata Storytelling and supporting my MSc dissertation evaluation, this is an acceptable tradeoff for operational stability. High-risk AI compliance requires acknowledgment, not perfection.
+
+> **Update, October 2026:** the dissertation evaluation referred to here did not end up running on candidate data. Ethics-approved recruitment did not clear inside the project timeline, so the human-participant protocol was replaced with synthetic adversarial evaluation: eight constructed agents with their expected outcomes committed to source before the run. The human study is named as future work in the submitted dissertation. The data residency tradeoff described above stands on its own terms.
 
 For a future enterprise deployment with strict data sovereignty mandates, this infrastructure choice will need to be revisited. It is documented, flagged, and tracked.
 
@@ -96,9 +98,9 @@ Once on the global endpoint, we kept Gemini 2.5 Pro for the final scoring rubric
 
 Out of curiosity, we tested running the final evaluation tasks on the global Flash endpoint too.
 
-The results were surprising. Because VERA leans heavily on strict schema enforcement -- forcing the model to populate structured JSON keys for confidence intervals, numeric scores, and explicit transcript quote references -- the structural framework does the heavy cognitive lifting. The model's job becomes filling a rigid contract rather than exercising open-ended judgement.
+The results were surprising. Because VERA leans heavily on strict schema enforcement, forcing the model to populate structured JSON keys for confidence intervals, numeric scores, and explicit transcript quote references, the structural framework does the heavy cognitive lifting. The model's job becomes filling a rigid contract rather than exercising open-ended judgement.
 
-The capability gap between Pro and Flash shrinks dramatically when you constrain the model's freedom with a rigid JSON schema. VERA now runs on Gemini 2.5 Flash for everything -- slashing operational API costs to a fraction of the original budget while keeping processing times fast.
+The capability gap between Pro and Flash shrinks dramatically when you constrain the model's freedom with a rigid JSON schema. VERA now runs on Gemini 2.5 Flash for everything, slashing operational API costs to a fraction of the original budget while keeping processing times fast.
 
 ## Defensive Engineering: Jitter and the 16-Second UX Ceiling
 
@@ -135,14 +137,14 @@ The timeout ceiling is a product decision, not an engineering one. I mapped the 
 
 | Timeline | Backend State | Frontend UX |
 |---|---|---|
-| 0s – 1s | Retry #1 | Invisible. Standard loader handles this naturally |
-| 1s – 3s | Retry #2 | Acceptable. Candidate assumes VERA is processing |
-| 3s – 7s | Retry #3 | Loader text shifts to indicate active analysis |
-| 7s – 15s | Retry #4 | Copy changes: "Still working on this, analysing context..." |
+| 0s to 1s | Retry #1 | Invisible. Standard loader handles this naturally |
+| 1s to 3s | Retry #2 | Acceptable. Candidate assumes VERA is processing |
+| 3s to 7s | Retry #3 | Loader text shifts to indicate active analysis |
+| 7s to 15s | Retry #4 | Copy changes: "Still working on this, analysing context..." |
 | 16s+ | Give up | Graceful error. Transcript checkpoint preserved |
 
 Clamping the loop at 16 seconds is where the UX breaks regardless of how good the UI handling is. It is better to fail cleanly, preserve the transcript checkpoint, and let the candidate retry the turn manually, than to keep them trapped in an infinite loading loop.
 
 ---
 
-*In the next post: VERA scored an AI model 4.45 out of 5. The lowest score was Collaboration at 3 out of 5 -- and what that result revealed about how we need to redesign the integrity layer.*
+*In the next post: VERA scored an AI model 4.45 out of 5. The lowest score was Collaboration at 3 out of 5, and what that result revealed about how we need to redesign the integrity layer.*

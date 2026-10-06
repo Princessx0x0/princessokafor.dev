@@ -1,0 +1,50 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import '../styles/prose.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  path: string;
+  eyebrow: string;
+  tags?: string[];
+  backHref: string;
+  backLabel: string;
+  footerLinks?: { href: string; label: string }[];
+}
+
+const {
+  title,
+  description,
+  path,
+  eyebrow,
+  tags,
+  backHref,
+  backLabel,
+  footerLinks = [],
+} = Astro.props;
+---
+<BaseLayout title={`${title} · Princess Okafor`} description={description} path={path} ogType="article">
+  <Nav variant="back" backHref={backHref} backLabel={backLabel} />
+
+  <article class="post-wrap">
+    <p class="post-eyebrow">{eyebrow}</p>
+    <h1 class="post-title">{title}</h1>
+    {description && <p class="post-desc">{description}</p>}
+    <div class="post-rule"></div>
+    {tags && tags.length > 0 && (
+      <div class="post-tags">
+        {tags.map(tag => <span class="tag">{tag}</span>)}
+      </div>
+    )}
+    <div class="prose">
+      <slot />
+    </div>
+    {footerLinks.length > 0 && (
+      <div class="post-footer">
+        {footerLinks.map(link => <a href={link.href}>{link.label}</a>)}
+      </div>
+    )}
+  </article>
+</BaseLayout>

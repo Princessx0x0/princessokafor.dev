@@ -1,0 +1,39 @@
+/* Shared foundation: reset, design tokens, page ground.
+   Imported by every layout, so it is the one place these live. */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white:       #FFFFFF;
+  --off-white:   #FAFAF9;
+  --blush:       #F7F0F4;
+  --navy:        #1B3A6B;
+  --navy-deep:   #0F2347;
+  --blue:        #0055CC;
+  --blue-mid:    #2D6BE4;
+  --blue-light:  #EBF1FC;
+  --rose:        #C4789A;
+  --rose-light:  #F5E8EF;
+  --ink:         #18182A;
+  --ink-muted:   #5C5C78;
+  --ink-faint:   #9898B0;
+  --rule:        #E2DCE8;
+  --vera-bg:     #0F2347;
+
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle, rgba(27,58,107,0.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+}

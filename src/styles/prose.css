@@ -1,0 +1,274 @@
+/* Article typography, shared by every post page. */
+
+.post-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 5rem 2.5rem 8rem;
+}
+
+.post-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.post-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--rose);
+}
+
+.post-title {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--navy);
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.post-desc {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 300;
+  color: var(--ink-muted);
+  line-height: 1.65;
+  margin-bottom: 2rem;
+}
+
+.post-rule {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--navy) 0%, var(--rose) 55%, transparent 100%);
+  margin-bottom: 3rem;
+}
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.post-tags .tag {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  background: var(--blue-light);
+  padding: 0.2rem 0.6rem;
+}
+
+/* ── Prose ── */
+.prose { overflow-x: hidden; }
+
+.prose h2 {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--navy);
+  margin: 3rem 0 1rem;
+  line-height: 1.2;
+}
+
+.prose h3 {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--navy);
+  margin: 2rem 0 0.75rem;
+}
+
+.prose p {
+  margin-bottom: 1.5rem;
+  line-height: 1.85;
+  color: var(--ink-muted);
+}
+
+.prose p strong { color: var(--ink); font-weight: 500; }
+
+.prose a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose ul, .prose ol { margin: 0 0 1.5rem 1.5rem; }
+
+.prose li {
+  margin-bottom: 0.5rem;
+  color: var(--ink-muted);
+  line-height: 1.75;
+}
+
+/* Wide diagrams scroll inside their own container */
+.prose .image-scroll-wrap {
+  position: relative;
+  margin: 2.5rem 0;
+}
+
+.prose .image-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.prose .image-scroll-container::-webkit-scrollbar { display: none; }
+
+.prose .image-scroll-container img {
+  max-width: none;
+  width: auto;
+  height: auto;
+  max-height: 500px;
+  display: block;
+  border: 1px solid var(--rule);
+}
+
+.scroll-hint {
+  display: none;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-top: 0.5rem;
+  text-align: center;
+  animation: hint-fade 2s ease-in-out infinite;
+}
+
+@keyframes hint-fade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.9rem;
+}
+
+.prose th {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--navy);
+  border-bottom: 2px solid var(--navy);
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.prose td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.prose tr:last-child td { border-bottom: none; }
+
+.prose td:first-child {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+/* Regular images */
+.prose img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  margin: 2.5rem auto;
+  display: block;
+  border: 1px solid var(--rule);
+}
+
+.prose img + em {
+  display: block;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  margin-top: -1.5rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.prose pre {
+  background: var(--navy-deep);
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 2rem 0;
+  border-left: 3px solid var(--rose);
+}
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: #A8C8FF;
+  line-height: 1.6;
+}
+
+.prose p code, .prose li code {
+  background: var(--blue-light);
+  color: var(--blue);
+  padding: 0.15rem 0.4rem;
+}
+
+.prose blockquote {
+  border-left: 2px solid var(--rose);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 3rem 0;
+}
+
+.post-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.post-footer a {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.post-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .post-wrap { padding: 2rem 1rem 5rem; overflow-x: hidden; }
+  .post-title { font-size: 2rem; }
+  .prose img { margin: 1.5rem 0; }
+  .scroll-hint { display: block; }
+  .prose .image-scroll-container img { max-height: 450px; }
+}

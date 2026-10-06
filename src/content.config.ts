@@ -18,6 +18,8 @@ const vera = defineCollection({
         title: z.string(),
         date: z.coerce.string(),
         description: z.string().optional(),
+        // was missing, so the VERA posts' tags were silently stripped and never rendered
+        tags: z.array(z.string()).optional(),
         order: z.number().optional(),
     }),
 });
