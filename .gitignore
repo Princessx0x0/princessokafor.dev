@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# OS cruft
+**/.DS_Store
+Thumbs.db

@@ -1,8 +1,0 @@
-defaultTheme = "light"
-disableThemeToggle = true
-ShowReadingTime = true
-ShowPostNavLinks = true
-ShowCodeCopyButtons = true
-
-[assets]
-  favicon = "/favicon.svg"
